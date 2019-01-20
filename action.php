@@ -16,15 +16,27 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      *                           handler was registered]
      * @return void
      */
+     public function  __construct() {
+         if(!function_exists("curl_init"))  {
+             msg($this->getLang('nocurl'),2);
+             return;  
+         }  
 
+    }
     public function handle_ajax_call_unknown(Doku_Event &$event, $param) {
       if ($event->data !== 'extern_url') {
         return;
       }
+     
       global $lang,$INPUT;
       $event->stopPropagation();
       $event->preventDefault();
        $url = $INPUT->str('url');    
+       if(!function_exists("curl_init")) {
+           echo "NOCURL";
+           return;
+       }
+    
        $ch = curl_init($url);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_FOLLOWLOCATION);
@@ -37,6 +49,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        return 1;
     }
      function prepend_span(Doku_Event &$event, $param) {
+         if(!function_exists("curl_init")) return;
 		  $event->data = preg_replace_callback(    
 		  "/\<a href=(.*?)class=\"urlextern\"/i",
         function ($matches) {			

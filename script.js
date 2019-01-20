@@ -24,6 +24,7 @@
 		    	lnk.prepend( '<span class="xtern_xtrn"></span> ' );
 			}
 			else {
+                if(data == "NOCURL") return;
 				lnk.prepend( '<span class="xtern_broken"></span> ');
 			}
 		});
