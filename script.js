@@ -19,7 +19,8 @@
 		 
 		request.done(function( data ,status) {		
             jQuery(current).siblings().remove();
-			if(data =="200") {			          
+       
+			if(data =="200" || data == '301' || data == '301') {		          
 		    	lnk.prepend( '<span class="xtern_xtrn"></span> ' );
 			}
 			else {

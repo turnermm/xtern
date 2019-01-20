@@ -28,7 +28,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        $ch = curl_init($url);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_FOLLOWLOCATION);
-		curl_setopt($ch, CURLOPT_MAXREDIRS, 2); 
+		curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 		curl_setopt($ch,CURLOPT_TIMEOUT,10);
 		$output = curl_exec($ch);
 		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
