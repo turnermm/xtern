@@ -7,7 +7,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
     public function register(Doku_Event_Handler $controller) {
 
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');
-        $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'prepend_span'); 
+    #    $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'prepend_span'); 
     }
 
     /**
@@ -49,6 +49,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        return 1;
     }
      function prepend_span(Doku_Event &$event, $param) {
+		 return;
          if(!function_exists("curl_init")) return;
 		  $event->data = preg_replace_callback(    
 		  "/\<a href=(.*?)class=\"urlextern\"/i",

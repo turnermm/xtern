@@ -1,14 +1,14 @@
-span.xtern_xtrn {
-    height: 8px;
-	width: 8px;
-	background-color: #01DF74;   
-	display: inline-block;		
+a.xtern_xtrn {
+   background-repeat: no-repeat;
+    background-position: 0 center;
+    padding: 0 0 0 18px;
+    background-image: url("images/xtern_green.png");
 }
-span.xtern_broken {
-    height: 8px;
-	width: 8px;
-	background-color: red;
-	display: inline-block;		
+a.xtern_broken {
+   background-repeat: no-repeat;
+   background-position: 0 center;
+    padding: 0 0 0 18px;
+   background-image: url("images/xtern_red.png");
 }
 span.xtern__xtern {
     height: 8px;
