@@ -4,4 +4,4 @@ email  turnermm02@shaw.ca
 date   2019-01-19
 name   xtern
 desc   red or green icons at link show if link is active
-url
+url    https://github.com/turnermm/xtern
