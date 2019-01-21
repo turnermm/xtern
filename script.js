@@ -1,8 +1,7 @@
  jQuery( document ).ready(function() { 	
 	  jQuery("#dokuwiki__content a" ).each (function( index ) { 
-	//  var target = jQuery( this ).attr('target');
-	//  if(!target || target != 'extern') return;
-      var _class = jQuery(this).attr('class');
+     var _class = jQuery(this).attr('class');
+     if(typeof _class == 'undefined') return;    
      if(!_class.match(/extern/)) return;
      var lnk = jQuery( this );
       var prev = jQuery( this ).prev();    
