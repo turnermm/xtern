@@ -1,9 +1,11 @@
  jQuery( document ).ready(function() { 	
 	  jQuery("#dokuwiki__content a" ).each (function( index ) { 
-	  var target = jQuery( this ).attr('target');
-	  if(!target && target != 'extern') return;
+	  var target = jQuery( this ).attr('target');   
+	  if(!target || target != 'extern') {     
+          return;
+      }
       var _class = jQuery(this).attr('class');
- 
+      if(!_class.match(/urlextern/)) return;
      var lnk = jQuery( this );
       var prev = jQuery( this ).prev();    
 	   var _url  = jQuery( this ).attr('href');
