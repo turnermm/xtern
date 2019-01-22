@@ -1,7 +1,7 @@
 base   xtern
 author Myron Turner
 email  turnermm02@shaw.ca
-date   2019-01-21
+date   2019-01-22
 name   xtern
 desc   red or green icons at link show if link is active
 url    https://github.com/turnermm/xtern
