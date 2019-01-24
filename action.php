@@ -6,6 +6,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
  
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
+       $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check');    
     }
 
     /**
@@ -14,13 +15,20 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      *                           handler was registered]
      * @return void
      */
-     public function  __construct() {
-         if(!function_exists("curl_init"))  {
-             msg($this->getLang('nocurl'),2);
+    
+   public function curl_check(Doku_Event &$event, $param) {
+        global $USERINFO;     
+        $admin = false;
+           if(isset($USERINFO)) {
+              $groups = $USERINFO['grps'];       
+              if(in_array('admin', $groups)) $admin = true;
+           }
+         if($admin && !function_exists("curl_init"))  {
+              msg($this->getLang('nocurl'),2);
              return;  
          }  
-
-    }
+   }
+   
     public function handle_ajax_call_unknown(Doku_Event &$event, $param) {
       if ($event->data !== 'extern_url') {
         return;
