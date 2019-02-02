@@ -46,7 +46,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        $ch = curl_init($url);
 	   if($this->getConf('ca_required')) {
             curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/ca/cacert.pem");
-            curl_setopt($ch, CURLOPT_SSL_ERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
 	   }
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 		curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
