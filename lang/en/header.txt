@@ -1,0 +1,4 @@
+**Download cacerts.pem** \\
+Some systems, in particular Windows, may require the manual installation of certificates for SSL.  If this is your case you can download the certificate here. Then set the ''ca_required'' setting to true in the Configuration Manager so that the downloaded certificates become active.  The cacerts.pem file must be periodically updated.\\
+**Check links** \\
+You can check for broken links on the entire wiki or you can check by namespace.  The latter might be preferable, or even necessary, on a large wiki. Clicking on the wiki pagename in the broken link list opens a new window with the page open for editing.
