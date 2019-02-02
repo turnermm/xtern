@@ -44,10 +44,12 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        }
     
        $ch = curl_init($url);
-        //curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/certs/cacert.pem");
-        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	   if($this->getConf('ca_required')) {
+            curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/ca/cacert.pem");
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+	   }
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-		curl_setopt($ch,CURLOPT_FOLLOWLOCATION);
+		curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 		curl_setopt($ch,CURLOPT_TIMEOUT,10);
 		$output = curl_exec($ch);

@@ -1,5 +1,10 @@
  jQuery( document ).ready(function() { 	
+      var in_admin = 0;
+      if(window.location.search.match(/do=admin/)) {
+		  in_admin =1;
+	  }  
 	  jQuery("#dokuwiki__content a" ).each (function( index ) { 
+	 if(in_admin) return;
      var _class = jQuery(this).attr('class');
      if(typeof _class == 'undefined') return;    
      if(!_class.match(/extern/)) return;
