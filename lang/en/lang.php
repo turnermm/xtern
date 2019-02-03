@@ -9,3 +9,4 @@ $lang['btn_download']    = 'Download  cacerts.pem';
 $lang['btn_check_links']  = 'Check Links';
 $lang['invalid']      = 'invalid input detected!';
 $lang['ns'] = 'Namespace (optional)';
+$lang['js']['restricted'] =  'Access restricted';

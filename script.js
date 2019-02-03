@@ -23,11 +23,15 @@
 		    dataType: "html"
 		});
 		 
-		request.done(function( data ,status) {		 
+		jQuery.when(request).done(function( data ,status) {		         
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
-			else {
+			else if(data.match(/^40\d/)) {	       
+			    lnk.attr('title', LANG.plugins.xtern.restricted);
+				lnk.removeClass(_class).addClass( "xtern_noaccess" );
+			}	
+			else {              
                 if(data == "NOCURL") return;           
                  lnk.removeClass(_class).addClass( "xtern_broken" );   
 			}

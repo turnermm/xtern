@@ -10,6 +10,12 @@ a.xtern_broken {
     padding: 0 0 0 18px;
    background-image: url("images/xtern_red.png");
 }
+a.xtern_noaccess {
+   background-repeat: no-repeat;
+   background-position: 0 center;
+    padding: 0 0 0 18px;
+   background-image: url("images/xtern_xcluded.png");
+}
 span.xtern__xtern {
     height: 8px;
 	width: 8px;
