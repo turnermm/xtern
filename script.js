@@ -27,7 +27,7 @@
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
-			else if(data != '404' &&  data.match(/^40\d/)) {	       
+			else if( data.match(/^40\d/)  &&  data !='404') {	       
 			    lnk.attr('title', LANG.plugins.xtern.restricted);
 				lnk.removeClass(_class).addClass( "xtern_noaccess" );
 			}	
