@@ -23,12 +23,42 @@
 		    dataType: "html"
 		});
 		 
-		jQuery.when(request).done(function( data ,status) {		         
+		jQuery.when(request).done(function( data ,status) {		       
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
-			else if( data.match(/^40\d/)  &&  data !='404') {	       
-			    lnk.attr('title', LANG.plugins.xtern.restricted);
+			else if( data.match(/^40\d/)  &&  data !='404') {
+                var title;  
+                switch (data) {
+                     case "400":
+                         title = '400: Bad Request';
+                         break;
+                    case "401":
+                         title = '401: Unauthorized'; 
+                         break;             
+                    case "402":
+                         title = '402: Payment Required';
+                         break;
+                    case "403":
+                         title = '403: Forbidden';
+                         break;
+                    case "405":
+                         title = '405: Method Not Allowed';
+                         break;
+                    case "406":
+                         title = '406: Not Acceptable';
+                         break;
+                    case "407":
+                         title = '407: Proxy Authentication Required (RFC 7235)';
+                         break;
+                    case "408":
+                        title = '408: Request Timeout';
+                         break;
+                    default:
+                         title=LANG.plugins.xtern.restricted;
+                         break;
+                }
+			    lnk.attr('title', title);
 				lnk.removeClass(_class).addClass( "xtern_noaccess" );
 			}	
 			else {              
