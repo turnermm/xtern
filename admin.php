@@ -1,4 +1,8 @@
 <?php
+/**
+ *   @author Myron Turner <turnermm02@shaw.ca>
+ *   @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
+*/
 class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private $dnld = false;
 	private $check = false;
@@ -37,10 +41,15 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
      * output appropriate html
      */
     function html() {
-	  $this->buttons('top');
+		
+	  $max_time =  $this->getConf('max_time');
+	  $ini_max = ini_get('max_execution_time');
+	  $max_time = $max_time >  $ini_max ?  $max_time : $ini_max;
+		  	
+	  $this->buttons($max_time);
 
 	  if($this->check) {
-	      $this->check_links();
+	      $this->check_links($max_time);
 	  }
 	  else if ($this->dnld) {
 		  $this->downloadPem();
@@ -48,9 +57,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	
     }
 	
-	     function check_links() {
+	     function check_links($max_time) {
+		   set_time_limit($max_time);
 		  $this->disable_ob();
-		   $this->buttons('top');  
+		   $this->buttons($max_time);  
 			if(isset($this->dir)){
                 $dir = trim($this->dir,':');
                 $dir = str_replace(':', '/', $dir);
@@ -72,10 +82,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			}
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
-          // $this->buttons('bottom');
 	}
        
-     function buttons($which="") {        
+     function buttons($max_time = "") {        
           echo $this->locale_xhtml('header');	 
           $ns = isset($this->dir) ? $this->dir : "";
           ptln('<div id="xtern_adminform">' .NL); 
@@ -89,6 +98,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           ptln('  <label><span class="xtern_font">' .$this->getLang('ns').'</span> ');
           ptln(' <input type="textbox" name="dir"  value="' . $ns . '" /></label>&nbsp;');                
           ptln('</form>');
+          if($max_time) {
+			    ptln('<br />' . $this->getLang('max_time') . ":  $max_time");
+		  }			  
           ptln('</div>');    
      }
      

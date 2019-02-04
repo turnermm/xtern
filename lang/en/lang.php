@@ -10,3 +10,4 @@ $lang['btn_check_links']  = 'Check Links';
 $lang['invalid']      = 'invalid input detected!';
 $lang['ns'] = 'Namespace (optional)';
 $lang['js']['restricted'] =  'Access restricted';
+$lang['max_time'] = "Maximum execution time (secs.)";

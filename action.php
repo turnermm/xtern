@@ -1,5 +1,8 @@
 <?php
-
+/**
+ *   @author Myron Turner <turnermm02@shaw.ca>
+ *   @license GPL 2 http://www.gnu.org/licenses/gpl-2.0.html
+*/
 // must be run within Dokuwiki
 if(!defined('DOKU_INC')) die();
 class action_plugin_xtern extends DokuWiki_Action_Plugin {
