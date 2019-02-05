@@ -9,7 +9,8 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
  
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
-       $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check');    
+       $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
+       $controller->register_hook('IO_WIKIPAGE_READ', 'AFTER', $this, 'handle_wiki_read'); 
     }
 
     /**
@@ -19,7 +20,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      * @return void
      */
     
-   public function curl_check(Doku_Event &$event, $param) {
+   public function curl_check(Doku_Event $event, $param) {
         global $USERINFO;     
         $admin = false;
            if(isset($USERINFO)) {
@@ -32,11 +33,11 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
          }  
    }
    
-    public function handle_ajax_call_unknown(Doku_Event &$event, $param) {
+    public function handle_ajax_call_unknown(Doku_Event $event, $param) {
       if ($event->data !== 'extern_url') {
         return;
       }
-     
+    
       global $lang,$INPUT;
       $event->stopPropagation();
       $event->preventDefault();
@@ -62,4 +63,23 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         return 1;
     }
 
+    function handle_wiki_read(Doku_Event $event, $param) {
+        global $INPUT;
+		$url = ($INPUT->str('xtern_url'));
+	    if(!$url) return;
+
+	    $event->result = preg_replace_callback(
+                "|(\[\[)*(". preg_quote($url). ")([^\]\[]+)(\]\])*|ms",
+                     function($matches){
+						 $message = $matches[0] . "==> 1." . $matches[1] . " -->2. " . $matches[2] . "-->3."  . $matches[3] . "-->4"  . $matches[4];
+                          msg($message,1);         
+						  if((isset($matches[1]) &&$matches[1] =='[[') && isset($matches[4]) && $matches[4] ==']]') {
+						  return "** BROKEN-LINK:" . $matches[0] . "LINK-BROKEN **";
+						  }
+						  
+                       return "** BROKEN-LINK:" .  $matches[2] .  "LINK-BROKEN **";
+                  }, 
+                  $event->result
+                );
+    }
  }

@@ -8,8 +8,14 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private $check = false;
 	private  $wikiRoot;
 	private  $dir = NULL;
+	private   $accumulator = null;
+	private $broken = array();
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
+		$this->accumulator = metaFN('xtern:accumulator','.ser');
+		//$this->broken = array();
+		//file_put_contents($this->accumulator,serialize(array()));
+		
 	}
 
     function handle() {
@@ -82,6 +88,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			}
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
+		   file_put_contents($this->accumulator,serialize($this->broken));
 	}
        
      function buttons($max_time = "") {        
@@ -103,20 +110,31 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		  }			  
           ptln('</div>');    
      }
-     
-     function local_url($id) {
+     /**
+	  *   @ $id  wiki page
+	  *   @	 $url  broken link address
+	 */
+     function local_url($id,$url) {
           $id = trim($id,':');
+		  $url = rawurlencode($url);		 
           $id = str_replace(array('"', "'"),array(""),$id);             
-              return " <a href='". DOKU_URL ."doku.php?id=$id&do=edit' target = 'xtern_xtern' class='wikilink1'>$id</a>";
+              return " <a href='". DOKU_URL ."doku.php?id=$id&do=edit&xtern_url=$url' target = 'xtern_xtern' class='wikilink1'>$id</a>";
            }
+	function add_broken($id,$url) {
+		if(!isset($this->broken[$id])) {
+			$this->broken[$id] = array();
+		}
+		$this->broken[$id][] = $url;
+	}		
 		function parse_dwfile($handle="",$id, $path) { 
 		   while (!feof($handle)) {
 				$buffer = fgets($handle);
-				if(preg_match("#\[\[(https?://.*?)\]\]#",$buffer,$matches)) {	
-					list($url,$rest) = explode('|',$matches[1]);
+				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
+					list($url,$rest) = explode('|',$matches[2]);
 					$status =   $this->link_check($url);
 					if($status !="200" && $status !="300"  && $status != "301") {                    
-                        $link =$this->local_url($id);                  
+                        $link =$this->local_url($id,$url);  
+						$this->add_broken($id,$url);
 						echo $status .":  $link:\n<br />";
 						   usleep(300000);
 						echo '&nbsp;&nbsp;&nbsp;&nbsp;' . $url . "\n<br />";
@@ -154,7 +172,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
         // Turn off output buffering
         ini_set('output_buffering', 'off');
         // Turn off PHP output compression
-        ini_set('zlib.output_compression', false);
+     //   ini_set('zlib.output_compression', false);
         // Implicitly flush the buffer(s)
         ini_set('implicit_flush', true);
         ob_implicit_flush(true);
