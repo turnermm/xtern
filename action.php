@@ -19,7 +19,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      * @return void
      */
     
-   public function curl_check(Doku_Event &$event, $param) {
+   public function curl_check(Doku_Event $event, $param) {
         global $USERINFO;     
         $admin = false;
            if(isset($USERINFO)) {
@@ -32,11 +32,11 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
          }  
    }
    
-    public function handle_ajax_call_unknown(Doku_Event &$event, $param) {
+    public function handle_ajax_call_unknown(Doku_Event $event, $param) {
       if ($event->data !== 'extern_url') {
         return;
       }
-     
+   
       global $lang,$INPUT;
       $event->stopPropagation();
       $event->preventDefault();

@@ -112,8 +112,8 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		function parse_dwfile($handle="",$id, $path) { 
 		   while (!feof($handle)) {
 				$buffer = fgets($handle);
-				if(preg_match("#\[\[(https?://.*?)\]\]#",$buffer,$matches)) {	
-					list($url,$rest) = explode('|',$matches[1]);
+				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
+					list($url,$rest) = explode('|',$matches[2]);
 					$status =   $this->link_check($url);
 					if($status !="200" && $status !="300"  && $status != "301") {                    
                         $link =$this->local_url($id);                  
