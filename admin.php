@@ -12,10 +12,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private $broken = array();
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
-		$this->accumulator = metaFN('xtern:accumulator','.ser');
-		//$this->broken = array();
-		//file_put_contents($this->accumulator,serialize(array()));
-		
+		$this->accumulator = metaFN('xtern:accumulator','.ser');		
 	}
 
     function handle() {
@@ -121,6 +118,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
               return " <a href='". DOKU_URL ."doku.php?id=$id&do=edit&xtern_url=$url' target = 'xtern_xtern' class='wikilink1'>$id</a>";
            }
 	function add_broken($id,$url) {
+         $id = trim($id,':');
 		if(!isset($this->broken[$id])) {
 			$this->broken[$id] = array();
 		}
