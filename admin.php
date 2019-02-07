@@ -129,9 +129,16 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 				$buffer = fgets($handle);
 				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
 					list($url,$rest) = explode('|',$matches[2]);
+                    if(strpos($url, '{{') !== false) return "";
+                    if(strpos($url, '}}') !== false) return "";
 					$status =   $this->link_check($url);
-					if($status !="200" && $status !="300"  && $status != "301") {                    
+					if($status !="200" && $status !="300"  && $status != "301") {      
                         $link =$this->local_url($id,$url);  
+                       $len = strlen($url);
+                        if(strlen($url) > 1024)  {
+                            $status = "414";                       
+                        }  
+                           $url = substr($url,0,256). '.  .  .';                        
 						$this->add_broken($id,$url);
 						echo $status .":  $link:\n<br />";
 						   usleep(300000);
@@ -158,7 +165,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			$output = curl_exec($ch);
 			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 			if(curl_errno($ch)){
-				return "500:  " . curl_error($ch);
+				return "Curl Erro: " .curl_errno($ch) .  "--" . curl_error($ch);
 			   // msg( 'Request Error:' . curl_error($ch));
 		   }
 			curl_close($ch);

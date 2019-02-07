@@ -80,7 +80,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
                 "| (?<!BROKEN-LINK:)(\[\[)*(". preg_quote($url). ")([^\]\[]+)(\]\])*(?! LINK-BROKEN)|ms",
                      function($matches){
 						 $message = $matches[0] . "==> 1." . $matches[1] . " -->2. " . $matches[2] . "-->3."  . $matches[3] . "-->4"  . $matches[4];
-                          msg($message,1);         
+                  //       msg($message,1);         
 						  if((isset($matches[1]) &&$matches[1] =='[[') && isset($matches[4]) && $matches[4] ==']]') {
 						  return "** BROKEN-LINK:" . $matches[0] . " LINK-BROKEN **";
 						  }
