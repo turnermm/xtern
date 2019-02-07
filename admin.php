@@ -138,8 +138,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                         if(strlen($url) > 1024)  {
                             $status = "414";                       
                         }  
+                                               
+						   $this->add_broken($id,$url);
                            $url = substr($url,0,256). '.  .  .';                        
-						$this->add_broken($id,$url);
 						echo $status .":  $link:\n<br />";
 						   usleep(300000);
 						echo '&nbsp;&nbsp;&nbsp;&nbsp;' . $url . "\n<br />";
