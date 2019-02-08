@@ -115,7 +115,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           $id = trim($id,':');
 		  $url = rawurlencode($url);		 
           $id = str_replace(array('"', "'"),array(""),$id);             
-              return " <a href='". DOKU_URL ."doku.php?id=$id&do=edit&xtern_url=$url' target = 'xtern_xtern' class='wikilink1'>$id</a>";
+              return " <a href='". DOKU_URL ."doku.php?id=$id&xtern_url=$url' target = 'xtern_xtern' class='wikilink1'>$id</a>";
            }
 	function add_broken($id,$url) {
          $id = trim($id,':');
@@ -129,10 +129,15 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 				$buffer = fgets($handle);
 				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
 					list($url,$rest) = explode('|',$matches[2]);
-                    if(strpos($url, '{{') !== false) return "";
-                    if(strpos($url, '}}') !== false) return "";
+                    if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
+                        if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
+                            $url = $submatches[1];
+                            $url = "submatches: $url";
+                        }
+                        else return "";
+                    }                 
 					$status =   $this->link_check($url);
-					if($status !="200" && $status !="300"  && $status != "301") {      
+					if($status !="200" && $status !="300"  && $status != "301") {       
                         $link =$this->local_url($id,$url);  
                        $len = strlen($url);
                         if(strlen($url) > 1024)  {
@@ -140,8 +145,11 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                         }  
                                                
 						   $this->add_broken($id,$url);
-                           $url = substr($url,0,256). '.  .  .';                        
-						echo $status .":  $link:\n<br />";
+                           $trunc = substr($url,0,512);  
+                           if(strlen($trunc) > strlen($url)) {
+                               $url .= '.  .  .';
+                           }
+					    	echo $status .":  $link:\n<br />";
 						   usleep(300000);
 						echo '&nbsp;&nbsp;&nbsp;&nbsp;' . $url . "\n<br />";
 						   usleep(300000);
@@ -207,7 +215,8 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			// filter all files not accessible
 			$path = $rootDir.'/'.$content;
 		 //   echo "$content\n<br />";
-			if(!in_array($content, $invisibleFileNames)) {
+		   $ext =  pathinfo ( $path,PATHINFO_EXTENSION);
+			if(!in_array($content, $invisibleFileNames) && $ext == 'txt' ) {
 				// if content is file & readable, add to array
 				if(is_file($path) && is_readable($path)) {
 					// save file name with path

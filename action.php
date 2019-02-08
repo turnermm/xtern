@@ -10,7 +10,9 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
-       $controller->register_hook('IO_WIKIPAGE_READ', 'AFTER', $this, 'handle_wiki_read'); 
+    //   $controller->register_hook('IO_WIKIPAGE_READ', 'AFTER', $this, 'handle_wiki_read'); 
+	$controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'handle_wiki_display'); 
+	
     }
 
     /**
@@ -63,31 +65,21 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		echo "$httpcode";
         return 1;
     }
-
-    function handle_wiki_read(Doku_Event $event, $param) {
-        global $INPUT;
+    function handle_wiki_display(Doku_Event $event, $param) {
+		global $INPUT;
 		$url = $INPUT->str('xtern_url');        
-	    if(!$url) return;
-        $id = $INPUT->str('id');
-        $ar = unserialize(file_get_contents($this->accumulator));
-        foreach($ar[$id] as $url) {
-            
-           $this->update_wiki_page($event->result, $url) ;
+       $id = $INPUT->str('id');
+	   if(!isset($url)  || empty($url)) return; 
+
+        $ar = unserialize(file_get_contents($this->accumulator));	
+        foreach($ar[$id] as $url) {  
+            $pat ='href="' . $url . '"';
+            msg($pat);
+         //	 $event->data = preg_replace($pat ,'<span class="search_hit">' .$url.'<\/span>', $event->data);
+		 $event->data = str_replace($pat ,'<span class="search_hit">' . $pat . '</span>', $event->data);	
         }
-    }
-    function update_wiki_page(&$result, $url) {
-	    $result = preg_replace_callback(
-                "| (?<!BROKEN-LINK:)(\[\[)*(". preg_quote($url). ")([^\]\[]+)(\]\])*(?! LINK-BROKEN)|ms",
-                     function($matches){
-						 $message = $matches[0] . "==> 1." . $matches[1] . " -->2. " . $matches[2] . "-->3."  . $matches[3] . "-->4"  . $matches[4];
-                  //       msg($message,1);         
-						  if((isset($matches[1]) &&$matches[1] =='[[') && isset($matches[4]) && $matches[4] ==']]') {
-						  return "** BROKEN-LINK:" . $matches[0] . " LINK-BROKEN **";
-						  }
-						  
-                       return "** BROKEN-LINK:" .  $matches[2] .  "LINK-BROKEN **";
-                  }, 
-                  $result
-                );
-    }
+    }		
+
+
+
  }
