@@ -115,7 +115,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           $id = trim($id,':');
 		  $url = rawurlencode($url);		 
           $id = str_replace(array('"', "'"),array(""),$id);             
-              return " <a href='". DOKU_URL ."doku.php?id=$id&xtern_url=$url' target = 'xtern_xtern' class='wikilink1'>$id</a>";
+              return " <a href='". DOKU_URL ."doku.php?id=$id&xtern_url=$url&do=edit' target = 'xtern_xtern' class='wikilink1'>$id</a>";
            }
 	function add_broken($id,$url) {
          $id = trim($id,':');
