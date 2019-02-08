@@ -162,7 +162,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                     }                 
 					$status =   $this->link_check($url);
 					if($status !="200" && $status !="300"  && $status != "301" && $status != "0") {       
-                        $link =$this->local_url($id,$url);  
+                       $link =$this->local_url($id,$url);  
                        $len = strlen($url);
                         if(strlen($url) > 1024)  {
                             $status = "414";                       
@@ -194,13 +194,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 			curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 			curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
-			curl_setopt($ch,CURLOPT_TIMEOUT,10);
+			curl_setopt($ch,CURLOPT_TIMEOUT,15);
 			$output = curl_exec($ch);
 			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curl_errno = curl_errno($ch);
-			if($curl_errno && $curl_errno !=3) {
-				return "Curl Erro: " .curl_errno($ch) .  "--" . curl_error($ch);
-			   // msg( 'Request Error:' . curl_error($ch));
+			 if($curl_errno && $curl_errno !=3) {
+				return "Curl Erro: " .curl_errno($ch) .  "--" . curl_error($ch);			   
 		   }
 			curl_close($ch);
 			return trim("$httpcode");   
@@ -239,9 +238,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		foreach($dirContent as $key => $content) {
 			// filter all files not accessible
 			$path = $rootDir.'/'.$content;
-		 //   echo "$content\n<br />";
-		   $ext =  pathinfo ( $path,PATHINFO_EXTENSION);
-			if(!in_array($content, $invisibleFileNames) && $ext == 'txt' ) {
+		 //   echo "$content\n<br />";	
+           if(!is_dir($path)) { 		 
+		       $ext =  pathinfo ( $path,PATHINFO_EXTENSION);
+			   if($ext !='txt') continue;
+		   }   
+			if(!in_array($content, $invisibleFileNames) ) {		
 				// if content is file & readable, add to array
 				if(is_file($path) && is_readable($path)) {
 					// save file name with path
