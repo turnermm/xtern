@@ -85,7 +85,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			}
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
-		   file_put_contents($this->accumulator,serialize($this->broken));
+		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
 	}
        
      function buttons($max_time = "") {        
