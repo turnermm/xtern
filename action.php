@@ -77,22 +77,15 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         foreach($ar[$id] as $url) {            
            $this->update_wiki_page($event->result, $url) ;
         }
-        $event->result = preg_replace("/LINK-BROKEN\s*\*\*\s+\*\*/",  'LINK-BROKEN',    $event->result  );
-		 $event->result = preg_replace("/LINK-BROKEN \*\*\*/",  'LINK-BROKEN **',    $event->result  );
     }
     function update_wiki_page(&$result, $url) {
 		msg( preg_quote($url));
-		 //     "| (?<!BROKEN-LINK:)(\[\[)*(". preg_quote($url). ")([^\]\[]+)(\]\])*(?! LINK-BROKEN)|ms",
 	    $result = preg_replace_callback(
-                "| (?<!BROKEN-LINK:)(\[\[)*(". preg_quote($url). ")([^\]\[]+)(\]\])*\s*(?! LINK-BROKEN)|ms",
+                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)|ms",
                      function($matches){
-					//	 $message = $matches[0] . "==> 1." . $matches[1] . " -->2. " . $matches[2] . "-->3."  . $matches[3] . "-->4"  . $matches[4];
-                   //       msg($message,1);         
-						  if((isset($matches[1]) &&$matches[1] =='[[') && isset($matches[4]) && $matches[4] ==']]') {
-						  return " ** BROKEN-LINK:" . $matches[0] . " LINK-BROKEN **";
-						  }
-						  
-                       return "** BROKEN-LINK:" .  $matches[2] .  "LINK-BROKEN **";
+                        // $msg = '<pre>' . print_r($matches,1) . '</pre>';
+                    //      msg($msg,1);         				  
+                         return "__ BROKEN-LINK:" .  $matches[0] .  " LINK-BROKEN __";
                   }, 
                   $result
                 );
