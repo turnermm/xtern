@@ -175,7 +175,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                            }
 					    	echo $status .":  $link:\n<br />";
 						   usleep(300000);
-						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line:' . "$lineno&nbsp;$url" . "\n<br />";
+						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
 						   usleep(300000);
 					}
 				}
