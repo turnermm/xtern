@@ -28,7 +28,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
               if(in_array('admin', $groups)) $admin = true;
            }
          if($admin && !function_exists("curl_init"))  {
-              msg($this->getLang('nocurl'),2);
+           //  msg($this->getLang('nocurl'),2);
              return;  
          }  
       	$this->accumulator = metaFN('xtern:accumulator','.ser');		
