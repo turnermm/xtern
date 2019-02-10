@@ -79,13 +79,15 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         }
     }
     function update_wiki_page(&$result, $url) {
-		msg( preg_quote($url));
+		msg( ($url), 2);
 	    $result = preg_replace_callback(
                       "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)|ms",
                      function($matches){
-                        // $msg = '<pre>' . print_r($matches,1) . '</pre>';
-                    //      msg($msg,1);         				  
-                         return "__ BROKEN-LINK:" .  $matches[0] .  " LINK-BROKEN __";
+                       $test = preg_split("/[\s]+/",$matches[2]);                      
+                        if(count($test) > 2) {                          
+                             return $matches[0];
+                        }       				  
+                         return "\n__ BROKEN-LINK:" .  $matches[0] .  " LINK-BROKEN __\n";
                   }, 
                   $result
                 );

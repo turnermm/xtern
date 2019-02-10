@@ -63,7 +63,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	     function check_links($max_time) {
 		   set_time_limit($max_time);
 		  $this->disable_ob();
-		   $this->buttons($max_time);  
+		   $this->buttons($max_time,$this->dir);  
 			if(isset($this->dir)){
                 $dir = trim($this->dir,':');
                 $dir = str_replace(':', '/', $dir);
@@ -88,9 +88,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
 	}
        
-     function buttons($max_time = "") {        
+     function buttons($max_time = "",$ns="") {        
           echo $this->locale_xhtml('header');	 
-          $ns = isset($this->dir) ? $this->dir : "";
+          //$ns = isset($this->dir) ? $this->dir : "";
           ptln('<div id="xtern_adminform">' .NL); 
           ptln('<form action="'.wl($ID).'" method="post">'); 
           // output hidden values to ensure dokuwiki will return back to this plugin	 
@@ -138,7 +138,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                     else continue;
                 }
                 if($in_file) {
-                    if(preg_match("#\s*\<\/file>#",$buffer)) {
+                    if(preg_match("#\<\/file>#",$buffer)) {
                         $in_file = false;
                     }
                     else continue;
@@ -147,10 +147,15 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                     $in_code=true;
                     continue;
                 }
-                 if(preg_match("/^\s*\<file.*?>#",$buffer)) {
+                  if(preg_match("#^\s*\<file.*?>#",$buffer)) {
                     $in_file=true;
                     continue;
                 }
+                 if(preg_match("#\<nowiki>#",$buffer)) {                                       
+                       if(preg_match('#\<nowiki>.*?https?:\/\/.*?\<\/nowiki\>#', $buffer)) {
+                          continue;
+                       }
+                }                
 				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
 					list($url,$rest) = explode('|',$matches[2]);
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
