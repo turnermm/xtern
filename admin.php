@@ -8,8 +8,11 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private $check = false;
 	private  $wikiRoot;
 	private  $dir = NULL;
+	private   $accumulator = null;
+	private $broken = array();
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
+		$this->accumulator = metaFN('xtern:accumulator','.ser');		
 	}
 
     function handle() {
@@ -60,7 +63,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	     function check_links($max_time) {
 		   set_time_limit($max_time);
 		  $this->disable_ob();
-		   $this->buttons($max_time);  
+		   $this->buttons($max_time,$this->dir);  
 			if(isset($this->dir)){
                 $dir = trim($this->dir,':');
                 $dir = str_replace(':', '/', $dir);
@@ -82,11 +85,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			}
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
+		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
 	}
        
-     function buttons($max_time = "") {        
+     function buttons($max_time = "",$ns="") {        
           echo $this->locale_xhtml('header');	 
-          $ns = isset($this->dir) ? $this->dir : "";
+          //$ns = isset($this->dir) ? $this->dir : "";
           ptln('<div id="xtern_adminform">' .NL); 
           ptln('<form action="'.wl($ID).'" method="post">'); 
           // output hidden values to ensure dokuwiki will return back to this plugin	 
@@ -103,23 +107,80 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		  }			  
           ptln('</div>');    
      }
-     
-     function local_url($id) {
+     /**
+	  *   @ $id  wiki page
+	  *   @	 $url  broken link address
+	 */
+     function local_url($id,$url) {
           $id = trim($id,':');
+		  $url = rawurlencode($url);		 
           $id = str_replace(array('"', "'"),array(""),$id);             
-              return " <a href='". DOKU_URL ."doku.php?id=$id&do=edit' target = 'xtern_xtern' class='wikilink1'>$id</a>";
+              return " <a href='". DOKU_URL ."doku.php?id=$id&xtern_url=$url&do=edit' target = 'xtern_xtern' class='wikilink1'>$id</a>";
            }
+	function add_broken($id,$url) {
+         $id = trim($id,':');
+		if(!isset($this->broken[$id])) {
+			$this->broken[$id] = array();
+		}
+		$this->broken[$id][] = $url;
+	}		
 		function parse_dwfile($handle="",$id, $path) { 
+           $in_code = false;
+           $in_file = false;
+           $lineno = 0;
 		   while (!feof($handle)) {
+               $lineno++;
 				$buffer = fgets($handle);
+                if($in_code) {
+                    if(preg_match("#<\/code>#",$buffer)) {
+                        $in_code = false;                        
+                    }
+                    else continue;
+                }
+                if($in_file) {
+                    if(preg_match("#\<\/file>#",$buffer)) {
+                        $in_file = false;
+                    }
+                    else continue;
+                }                
+                if(preg_match("#^\s*\<code.*?>#",$buffer)) {                 
+                    $in_code=true;
+                    continue;
+                }
+                  if(preg_match("#^\s*\<file.*?>#",$buffer)) {
+                    $in_file=true;
+                    continue;
+                }
+                 if(preg_match("#\<nowiki>#",$buffer)) {                                       
+                       if(preg_match('#\<nowiki>.*?https?:\/\/.*?\<\/nowiki\>#', $buffer)) {
+                          continue;
+                       }
+                }                
 				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
 					list($url,$rest) = explode('|',$matches[2]);
+                    if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
+                        if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
+                            $url = $submatches[1];
+                            $url = "submatches: $url";
+                        }
+                        else return "";
+                    }                 
 					$status =   $this->link_check($url);
-					if($status !="200" && $status !="300"  && $status != "301") {                    
-                        $link =$this->local_url($id);                  
-						echo $status .":  $link:\n<br />";
+					if($status !="200" && $status !="300"  && $status != "301" && $status != "0") {       
+                       $link =$this->local_url($id,$url);  
+                       $len = strlen($url);
+                        if(strlen($url) > 1024)  {
+                            $status = "414";                       
+                        }  
+                                               
+						   $this->add_broken($id,$url);
+                           $trunc = substr($url,0,512);  
+                           if(strlen($trunc) > strlen($url)) {
+                               $url .= '.  .  .';
+                           }
+					    	echo $status .":  $link:\n<br />";
 						   usleep(300000);
-						echo '&nbsp;&nbsp;&nbsp;&nbsp;' . $url . "\n<br />";
+						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
 						   usleep(300000);
 					}
 				}
@@ -138,12 +199,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
 			curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 			curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
-			curl_setopt($ch,CURLOPT_TIMEOUT,10);
+			curl_setopt($ch,CURLOPT_TIMEOUT,15);
 			$output = curl_exec($ch);
 			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			if(curl_errno($ch)){
-				return "500:  " . curl_error($ch);
-			   // msg( 'Request Error:' . curl_error($ch));
+            $curl_errno = curl_errno($ch);
+			 if($curl_errno && $curl_errno !=3) {
+				return "Curl Erro: " .curl_errno($ch) .  "--" . curl_error($ch);			   
 		   }
 			curl_close($ch);
 			return trim("$httpcode");   
@@ -182,8 +243,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		foreach($dirContent as $key => $content) {
 			// filter all files not accessible
 			$path = $rootDir.'/'.$content;
-		 //   echo "$content\n<br />";
-			if(!in_array($content, $invisibleFileNames)) {
+		 //   echo "$content\n<br />";	
+           if(!is_dir($path)) { 		 
+		       $ext =  pathinfo ( $path,PATHINFO_EXTENSION);
+			   if($ext !='txt') continue;
+		   }   
+			if(!in_array($content, $invisibleFileNames) ) {		
 				// if content is file & readable, add to array
 				if(is_file($path) && is_readable($path)) {
 					// save file name with path
