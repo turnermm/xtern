@@ -10,9 +10,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private  $dir = NULL;
 	private   $accumulator = null;
 	private $broken = array();
+    private  $debug_handle = null;
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
 		$this->accumulator = metaFN('xtern:accumulator','.ser');		
+        $this->debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
+        
 	}
 
     function handle() {
@@ -77,6 +80,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			echo "Checking links\n<br />";
 			 usleep(300000);
 			foreach($site AS $entry=>$data) {
+                $this->write_debug("\n** New File" . $data['path']);
 				  $handle = fopen($data['path'], "r");             
 				 if ($handle) {	
 					$this->parse_dwfile($handle,$data['id'],$data['path']);
@@ -86,6 +90,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
+           fclose($this->debug_handle);
 	}
        
      function buttons($max_time = "",$ns="") {        
@@ -124,13 +129,86 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		}
 		$this->broken[$id][] = $url;
 	}		
-		function parse_dwfile($handle="",$id, $path) { 
+    
+    		function parse_dwfile($handle="",$id, $path) { 
            $in_code = false;
            $in_file = false;
            $lineno = 0;
 		   while (!feof($handle)) {
                $lineno++;
 				$buffer = fgets($handle);
+                $this->write_debug($buffer);
+                if($in_code) {
+                    if(preg_match("#<\/code>#",$buffer)) {
+                        $in_code = false;                        
+                    }
+                    else continue;
+                }
+                if($in_file) {
+                    if(preg_match("#\<\/file>#",$buffer)) {
+                        $in_file = false;
+                    }
+                    else continue;
+                }                
+                if(preg_match("#^\s*\<code.*?>#",$buffer)) {                 
+                    $in_code=true;
+                    continue;
+                }
+                  if(preg_match("#^\s*\<file.*?>#",$buffer)) {
+                    $in_file=true;
+                    continue;
+                }
+                 if(preg_match("#\<nowiki>#",$buffer)) {                                       
+                       if(preg_match('#\<nowiki>.*?https?:\/\/.*?\<\/nowiki\>#', $buffer)) {
+                          continue;
+                       }
+                }  
+                 if(preg_match("#https?://\S+#",$buffer,$matches)) {                     
+                 $this->do_check($matches[0],$lineno,$id);
+                 }
+              }
+           }   
+           function do_check($url, $lineno,$id = "") {
+                //  if(preg_match("#https?://\S+#",$buffer,$matches)) {                        
+                    $this->write_debug("matches-0: " .$url);
+					list($url,$rest) = explode('|',$url);
+                    if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
+                        if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
+                            $url = $submatches[1];
+                            $url = "submatches: $url";
+                        }
+                        else return "";
+                    }                 
+                    $url = trim($url,']');
+					$status =   $this->link_check($url);
+                    $this->write_debug("$status -- url: " .$url);
+					if($status !="200" && $status !="300"  && $status != "301"  && $status != "0") {       
+                       $link =$this->local_url($id,$url);  
+                       $len = strlen($url);
+                        if(strlen($url) > 1024)  {
+                            $status = "414";                       
+                        }  
+                                               
+						   $this->add_broken($id,$url);
+                           $trunc = substr($url,0,512);  
+                           if(strlen($trunc) > strlen($url)) {
+                               $url .= '.  .  .';
+                           }
+					    	echo $status .":  $link:\n<br />";
+						   usleep(300000);
+						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
+						   usleep(300000);
+					}
+			//	} 		   
+		}	
+		function __parse_dwfile($handle="",$id, $path) { 
+           $in_code = false;
+           $in_file = false;
+           $lineno = 0;
+		   while (!feof($handle)) {
+               $lineno++;
+				$buffer = fgets($handle);
+                $this->write_debug($buffer);
                 if($in_code) {
                     if(preg_match("#<\/code>#",$buffer)) {
                         $in_code = false;                        
@@ -156,8 +234,11 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                           continue;
                        }
                 }                
-				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
-					list($url,$rest) = explode('|',$matches[2]);
+			//	if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
+                	//if(preg_match("#(\[\[)*(https?://\S+)(\]\])*\s*#",$buffer,$matches)) {
+                  if(preg_match("#https?://\S+#",$buffer,$matches)) {                        
+                    $this->write_debug("matches-0: " .$matches[0]);
+					list($url,$rest) = explode('|',$matches[0]);
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
                         if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
                             $url = $submatches[1];
@@ -165,8 +246,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                         }
                         else return "";
                     }                 
+                    $url = trim($url,']');
 					$status =   $this->link_check($url);
-					if($status !="200" && $status !="300"  && $status != "301" && $status != "0") {       
+                    $this->write_debug("$status -- url: " .$url);
+					if($status !="200" && $status !="300"  && $status != "301"  && $status != "0") {       
                        $link =$this->local_url($id,$url);  
                        $len = strlen($url);
                         if(strlen($url) > 1024)  {
@@ -300,6 +383,13 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
         echo vsprintf("%s:  %s\n",$args);
         ob_flush();
     }
+
+    function write_debug($data) {   
+      if(!$this->debug_handle) return;  
+      fwrite($this->debug_handle, "$data\n");
+ //     fclose($handle);
+
+}
 
 
 }
