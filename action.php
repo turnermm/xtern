@@ -94,7 +94,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
                                     if(strpos($piece, $this->current) !== false && strpos($matches[0],'-LINK:' .$piece) === false) {   
 								  	   if($matches[1] == '[[') {
 										   $link = preg_quote($piece);
-										   $matches[0] = preg_replace("#\[\[.*?\]\]#ms","__ BROKEN-LINK:[[$piece$1]] LINK-BROKEN __",$matches[0]);
+										   $matches[0] = preg_replace("#\[\[$link\|?(.*?)\]\]#ms","__ BROKEN-LINK:[[$piece$1]] LINK-BROKEN __",$matches[0]);										 
 									   }
                                        else  
 									   {
