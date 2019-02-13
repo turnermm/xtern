@@ -10,9 +10,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private  $dir = NULL;
 	private   $accumulator = null;
 	private $broken = array();
+    private  $debug_handle = null;
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
 		$this->accumulator = metaFN('xtern:accumulator','.ser');		
+        $this->debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
+        
 	}
 
     function handle() {
@@ -77,6 +80,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			echo "Checking links\n<br />";
 			 usleep(300000);
 			foreach($site AS $entry=>$data) {
+                $this->write_debug("\n** New File" . $data['path']);
 				  $handle = fopen($data['path'], "r");             
 				 if ($handle) {	
 					$this->parse_dwfile($handle,$data['id'],$data['path']);
@@ -86,6 +90,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
            ptln("<br /><b>DONE</b>");
            ptln('</div>' . NL);
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
+           fclose($this->debug_handle);
 	}
        
      function buttons($max_time = "",$ns="") {        
@@ -124,13 +129,15 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		}
 		$this->broken[$id][] = $url;
 	}		
-		function parse_dwfile($handle="",$id, $path) { 
+    
+    		function parse_dwfile($handle="",$id, $path) { 
            $in_code = false;
            $in_file = false;
            $lineno = 0;
 		   while (!feof($handle)) {
                $lineno++;
 				$buffer = fgets($handle);
+                $this->write_debug($buffer);
                 if($in_code) {
                     if(preg_match("#<\/code>#",$buffer)) {
                         $in_code = false;                        
@@ -155,9 +162,29 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                        if(preg_match('#\<nowiki>.*?https?:\/\/.*?\<\/nowiki\>#', $buffer)) {
                           continue;
                        }
-                }                
-				if(preg_match("#(\[\[)*(https?://.*?[^\]\[]+)(\]\])*#",$buffer,$matches)) {
-					list($url,$rest) = explode('|',$matches[2]);
+                }  
+                 if(preg_match("#\[?(https?://\S+)\]?#",$buffer,$matches)) {   
+                       $this->write_debug('m0='.$matches[0]);				 
+                       preg_match_all("#https?://\S+#",$buffer,$submatches);					   
+					   $num_urls = count($submatches[0]);
+					   $this->write_debug(print_r($submatches,1));
+					   if($num_urls > 1) {
+						   foreach($submatches[0] as $link) {
+							 //  $link = preg_replace("#[\.\)\]\;\,\-\{\s\*\+]+$#m","",$link);							
+							  $link = preg_replace("#[^\w\#\?\/]+$#m","",$link);
+							  $this->write_debug('trim: ' .$link);
+							  $this->do_check($link,$lineno,$id);								   
+						   }
+					   }
+                       else {
+						   $this->do_check($matches[1],$lineno,$id);	
+					   }						   
+                 }
+              }
+           }   
+           function do_check($url, $lineno,$id = "") {
+                    $this->write_debug("matches-0: " .$url);
+					list($url,$rest) = explode('|',$url);
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
                         if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
                             $url = $submatches[1];
@@ -165,8 +192,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                         }
                         else return "";
                     }                 
+                    $url = trim($url,']');
 					$status =   $this->link_check($url);
-					if($status !="200" && $status !="300"  && $status != "301" && $status != "0") {       
+                    $this->write_debug("$status -- url: " .$url);
+					if($status !="200" && $status !="300"  && $status != "301"  && $status != "0") {       
                        $link =$this->local_url($id,$url);  
                        $len = strlen($url);
                         if(strlen($url) > 1024)  {
@@ -183,8 +212,6 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
 						   usleep(300000);
 					}
-				}
-		   }
 		}	
 			
 		  function link_check($url) {  
@@ -300,6 +327,13 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
         echo vsprintf("%s:  %s\n",$args);
         ob_flush();
     }
+
+    function write_debug($data) {   
+      if(!$this->debug_handle) return;  
+      fwrite($this->debug_handle, "$data\n");
+ //     fclose($handle);
+
+}
 
 
 }

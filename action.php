@@ -7,6 +7,7 @@
 if(!defined('DOKU_INC')) die();
 class action_plugin_xtern extends DokuWiki_Action_Plugin {
    	private   $accumulator = null;
+    private $current;
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
@@ -78,16 +79,32 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
            $this->update_wiki_page($event->result, $url) ;
         }
     }
+    
     function update_wiki_page(&$result, $url) {
 		msg( ($url), 2);
+        $this->current = $url; 
+        
 	    $result = preg_replace_callback(
-                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)|ms",
+                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]|ms",
                      function($matches){
                        $test = preg_split("/[\s]+/",$matches[2]);                      
-                        if(count($test) > 2) {                          
-                             return $matches[0];
+                			    							
+							foreach($test as $piece) {
+								if(strpos($piece,'http') !== false) {
+                                    if(strpos($piece, $this->current) !== false && strpos($matches[0],'-LINK:' .$piece) === false) {   
+								  	   if($matches[1] == '[[') {
+										   $link = preg_quote($piece);
+										   $matches[0] = preg_replace("#\[\[.*?\]\]#ms","__ BROKEN-LINK:[[$piece$1]] LINK-BROKEN __",$matches[0]);
+									   }
+                                       else  
+									   {
+                                        $matches[0] = str_replace($piece,  "__ BROKEN-LINK:" .  $piece .  " LINK-BROKEN __", $matches[0] );								
+								}	
+							}						                              
                         }       				  
-                         return "\n__ BROKEN-LINK:" .  $matches[0] .  " LINK-BROKEN __\n";
+							}						                              
+                 
+                        return $matches[0]; 
                   }, 
                   $result
                 );
