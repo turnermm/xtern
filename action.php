@@ -87,20 +87,23 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 	    $result = preg_replace_callback(
                       "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]|ms",
                      function($matches){
-                      msg("current: "   . $this->current);
-                     
                        $test = preg_split("/[\s]+/",$matches[2]);                      
-                       $multi = "";
-                 
-                        if(count($test) > 1 || preg_match("#(\<b#",$matches[2])) { 					    							
+                			    							
 							foreach($test as $piece) {
 								if(strpos($piece,'http') !== false) {
-                                    if(strpos($piece, $this->current) !== false) {
+                                    if(strpos($piece, $this->current) !== false && strpos($matches[0],'-LINK:' .$piece) === false) {   
+								  	   if($matches[1] == '[[') {
+										   $link = preg_quote($piece);
+										   $matches[0] = preg_replace("#\[\[.*?\]\]#ms","__ BROKEN-LINK:[[$piece$1]] LINK-BROKEN __",$matches[0]);
+									   }
+                                       else  
+									   {
                                         $matches[0] = str_replace($piece,  "__ BROKEN-LINK:" .  $piece .  " LINK-BROKEN __", $matches[0] );								
 								}	
 							}						                              
                         }       				  
-                        } 
+							}						                              
+                 
                         return $matches[0]; 
                   }, 
                   $result
