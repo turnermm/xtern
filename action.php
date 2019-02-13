@@ -81,11 +81,17 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
     function update_wiki_page(&$result, $url) {
 		msg( ($url), 2);
 	    $result = preg_replace_callback(
-                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)|ms",
+                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]|ms",
                      function($matches){
                        $test = preg_split("/[\s]+/",$matches[2]);                      
-                        if(count($test) > 2) {                          
-                             return $matches[0];
+                        if(count($test) > 1 || preg_match("#(\<br\>|\<br\\s\/\>#",$matches[2])) { 					    
+							$ar = preg_split("#\s#",$matches[2]);	
+							foreach($ar as $piece) {
+								if(strpos($piece,'http:') !== false) {
+									return "\n__ BROKEN-LINK:" .  $piece .  " LINK-BROKEN __\n";
+									break;
+								}	
+							}						                              
                         }       				  
                          return "\n__ BROKEN-LINK:" .  $matches[0] .  " LINK-BROKEN __\n";
                   }, 

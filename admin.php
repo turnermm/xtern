@@ -163,13 +163,26 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                           continue;
                        }
                 }  
-                 if(preg_match("#https?://\S+#",$buffer,$matches)) {                     
-                 $this->do_check($matches[0],$lineno,$id);
+                 if(preg_match("#\[?(https?://\S+)\]?#",$buffer,$matches)) {   
+                       $this->write_debug('m0='.$matches[0]);				 
+                       preg_match_all("#https?://\S+#",$buffer,$submatches);					   
+					   $num_urls = count($submatches[0]);
+					   $this->write_debug(print_r($submatches,1));
+					   if($num_urls > 1) {
+						   foreach($submatches[0] as $link) {
+							 //  $link = preg_replace("#[\.\)\]\;\,\-\{\s\*\+]+$#m","",$link);							
+							  $link = preg_replace("#[^\w\#\?\/]+$#m","",$link);
+							  $this->write_debug('trim: ' .$link);
+							  $this->do_check($link,$lineno,$id);								   
+						   }
+					   }
+                       else {
+						   $this->do_check($matches[1],$lineno,$id);	
+					   }						   
                  }
               }
            }   
            function do_check($url, $lineno,$id = "") {
-                //  if(preg_match("#https?://\S+#",$buffer,$matches)) {                        
                     $this->write_debug("matches-0: " .$url);
 					list($url,$rest) = explode('|',$url);
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
@@ -199,7 +212,6 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
 						   usleep(300000);
 					}
-			//	} 		   
 		}	
 		function __parse_dwfile($handle="",$id, $path) { 
            $in_code = false;
