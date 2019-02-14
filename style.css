@@ -34,7 +34,14 @@ div#xtern_chklnk{
     min-width: 450px;
 	overflow:scroll;
 }
-
+div#xtern_review{
+	border: 1px solid gray;
+	margin:0;
+	max-height: 550px;
+    min-height: 400px;
+    min-width: 450px;
+	overflow:auto;
+}
 span.xtern_font, input.xtern_font {
     font-size: 11pt;
 }

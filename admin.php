@@ -38,6 +38,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
         case 'download' : 
 	  	    $this->output = 'download'; 
 			$this->dnld = true;
+             break;			
+	    case 'review_links' :
+  	  	    $this->output = 'reviews'; 
+	    	$this->review = true;
       }      
 	
 	  //msg(__DIR__);
@@ -60,7 +64,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	  else if ($this->dnld) {
 		  $this->downloadPem();
 	  }
-	
+	else if($this->review ) {        
+          $this->review_links();
+      }
     }
 	
 	     function check_links($max_time) {
@@ -92,6 +98,18 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
            fclose($this->debug_handle);
 	}
+    function review_links()  {  
+   		   set_time_limit($max_time);
+		  $this->disable_ob();
+		   $this->buttons($max_timer);  
+
+         ptln('<div id="xtern_review"><hr>');
+       for($i=0;$i< 50; $i++)  {
+           echo "this is a line\n<br />";
+           if($i % 10 == 0)  usleep(300000);
+       }   
+           ptln('</div>' . NL);
+      }  
        
      function buttons($max_time = "",$ns="") {        
           echo $this->locale_xhtml('header');	 
@@ -106,6 +124,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           ptln('&nbsp;  <input type="submit" name="cmd[check_links]" class  = "xtern_font" value="'.$this->getLang('btn_check_links').'" />');
           ptln('  <label><span class="xtern_font">' .$this->getLang('ns').'</span> ');
           ptln(' <input type="textbox" name="dir"  value="' . $ns . '" /></label>&nbsp;');                
+          ptln('&nbsp;  <input type="submit" name="cmd[review_links]" class  = "xtern_font" value="'.$this->getLang('btn_review').'" />');          
           ptln('</form>');
           if($max_time) {
 			    ptln('<br />' . $this->getLang('max_time') . ":  $max_time");
