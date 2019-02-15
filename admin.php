@@ -10,11 +10,13 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private  $dir = NULL;
 	private   $accumulator = null;
 	private $broken = array();
+	private $review = array();
+	private $headers;
     private  $debug_handle = null;
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
 		$this->accumulator = metaFN('xtern:accumulator','.ser');		
-        $this->debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
+     //   $this->debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
         
 	}
 
@@ -72,6 +74,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	     function check_links($max_time) {
 		   set_time_limit($max_time);
 		  $this->disable_ob();
+		   $this->headers = array();
 		   $this->buttons($max_time,$this->dir);  
 			if(isset($this->dir)){
                 $dir = trim($this->dir,':');
@@ -84,30 +87,36 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		    usleep(300000);	
 			$site = $this->scanDirectories($dir);
 			echo "Checking links\n<br />";
+            echo "<table>\n";
 			 usleep(300000);
 			foreach($site AS $entry=>$data) {
-                $this->write_debug("\n** New File" . $data['path']);
 				  $handle = fopen($data['path'], "r");             
 				 if ($handle) {	
 					$this->parse_dwfile($handle,$data['id'],$data['path']);
 					fclose($handle);
 				 }
 			}
-           ptln("<br /><b>DONE</b>");
+           ptln("</table><b>DONE</b>");
            ptln('</div>' . NL);
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
-           fclose($this->debug_handle);
+       //    fclose($this->debug_handle);
 	}
     function review_links()  {  
+          $this->review = unserialize(io_readFile($this->accumulator ,false)) ;
    		   set_time_limit($max_time);
 		  $this->disable_ob();
 		   $this->buttons($max_timer);  
 
          ptln('<div id="xtern_review"><hr>');
-       for($i=0;$i< 50; $i++)  {
-           echo "this is a line\n<br />";
-           if($i % 10 == 0)  usleep(300000);
+         ptln('<table>');
+		 foreach($this->review as $id=>$errors) {
+		           ptln("<tr><th>$id</th></tr>");
+               
+                   foreach($errors as $error) {
+                       $this->do_check($error, "", $id);					 
+				   }					   
        }   
+           ptln("</table><b>DONE</b>");
            ptln('</div>' . NL);
       }  
        
@@ -156,7 +165,6 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		   while (!feof($handle)) {
                $lineno++;
 				$buffer = fgets($handle);
-                $this->write_debug($buffer);
                 if($in_code) {
                     if(preg_match("#<\/code>#",$buffer)) {
                         $in_code = false;                        
@@ -183,15 +191,12 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                        }
                 }  
                  if(preg_match("#\[?(https?://\S+)\]?#",$buffer,$matches)) {   
-                       $this->write_debug('m0='.$matches[0]);				 
+                       
                        preg_match_all("#https?://\S+#",$buffer,$submatches);					   
 					   $num_urls = count($submatches[0]);
-					   $this->write_debug(print_r($submatches,1));
 					   if($num_urls > 1) {
 						   foreach($submatches[0] as $link) {
-							 //  $link = preg_replace("#[\.\)\]\;\,\-\{\s\*\+]+$#m","",$link);							
 							  $link = preg_replace("#[^\w\#\?\/]+$#m","",$link);
-							  $this->write_debug('trim: ' .$link);
 							  $this->do_check($link,$lineno,$id);								   
 						   }
 					   }
@@ -201,9 +206,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                  }
               }
            }   
-           function do_check($url, $lineno,$id = "") {
-                    $this->write_debug("matches-0: " .$url);
+           function do_check($url, $lineno = "",$id = "") {  
 					list($url,$rest) = explode('|',$url);
+                    $header = $id ? "<tr><th>$id</th></tr>" :  "";
+               
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
                         if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
                             $url = $submatches[1];
@@ -213,22 +219,33 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                     }                 
                     $url = trim($url,']');
 					$status =   $this->link_check($url);
-                    $this->write_debug("$status -- url: " .$url);
 					if($status !="200" && $status !="300"  && $status != "301"  && $status != "0") {       
                        $link =$this->local_url($id,$url);  
                        $len = strlen($url);
                         if(strlen($url) > 1024)  {
                             $status = "414";                       
                         }  
-                                               
+                           if($lineno) {
 						   $this->add_broken($id,$url);
+							   if(!isset($this->headers[$id])) {
+								   ptln($header);
+								   $this->headers[$id] = 1;
+							   }   
+						   }   
                            $trunc = substr($url,0,512);  
                            if(strlen($trunc) > strlen($url)) {
                                $url .= '.  .  .';
                            }
+                           ptln('<tr><td>');
 					    	echo $status .":  $link:\n<br />";
 						   usleep(300000);
-						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
+                           if($lineno) {
+						       echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n";
+                           }
+                           else {
+                               echo "&nbsp;&nbsp;&nbsp;&nbsp;<u>problem link:</u> $url\n";
+                           }                       
+                       ptln('</td></tr>');
 						   usleep(300000);
 					}
 		}	
@@ -348,10 +365,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
     }
 
     function write_debug($data) {   
+	return;
       if(!$this->debug_handle) return;  
       fwrite($this->debug_handle, "$data\n");
- //     fclose($handle);
-
 }
 
 
