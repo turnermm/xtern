@@ -12,3 +12,8 @@ $lang['ns'] = 'Namespace (optional)';
 $lang['js']['restricted'] =  'Access restricted';
 $lang['max_time'] = "Maximum execution time (secs.)";
 $lang['btn_review'] = 'Review last link check';
+$lang['info_show'] = 'Info';
+$lang['js']['info_show'] = $lang['info_show'] ;
+$lang['js']['info_close'] = 'Close info';
+
+

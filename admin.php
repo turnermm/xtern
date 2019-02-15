@@ -102,14 +102,14 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
        //    fclose($this->debug_handle);
 	}
     function review_links()  {  
-          $this->review = unserialize(io_readFile($this->accumulator ,false)) ;
+          $review = unserialize(io_readFile($this->accumulator ,false)) ;
    		   set_time_limit($max_time);
 		  $this->disable_ob();
 		   $this->buttons($max_timer);  
 
          ptln('<div id="xtern_review"><hr>');
          ptln('<table>');
-		 foreach($this->review as $id=>$errors) {
+		 foreach($review as $id=>$errors) {
 		           ptln("<tr><th>$id</th></tr>");
                
                    foreach($errors as $error) {
@@ -121,7 +121,9 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
       }  
        
      function buttons($max_time = "",$ns="") {        
+          ptln('<div id="xtern_info">');     
           echo $this->locale_xhtml('header');	 
+		  ptln('</div>');
           //$ns = isset($this->dir) ? $this->dir : "";
           ptln('<div id="xtern_adminform">' .NL); 
           ptln('<form action="'.wl($ID).'" method="post">'); 
@@ -134,6 +136,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           ptln('  <label><span class="xtern_font">' .$this->getLang('ns').'</span> ');
           ptln(' <input type="textbox" name="dir"  value="' . $ns . '" /></label>&nbsp;');                
           ptln('&nbsp;  <input type="submit" name="cmd[review_links]" class  = "xtern_font" value="'.$this->getLang('btn_review').'" />');          
+          ptln('&nbsp;  <input type="button"  class = "xtern_info_but" value = "'. $this->getLang('info_show') . '">');		  
           ptln('</form>');
           if($max_time) {
 			    ptln('<br />' . $this->getLang('max_time') . ":  $max_time");

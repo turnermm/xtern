@@ -45,4 +45,6 @@ div#xtern_review{
 span.xtern_font, input.xtern_font {
     font-size: 11pt;
 }
-
+div#xtern_info {
+	display:none;
+}	
