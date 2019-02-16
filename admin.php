@@ -10,7 +10,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private  $dir = NULL;
 	private   $accumulator = null;
 	private $broken = array();
-	private $review = array();
+	private $review = false;	
 	private $headers;
     private  $debug_handle = null;
     function __construct() {
@@ -102,14 +102,14 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
        //    fclose($this->debug_handle);
 	}
     function review_links()  {  
-          $review = unserialize(io_readFile($this->accumulator ,false)) ;
+          $reviews_ar = unserialize(io_readFile($this->accumulator ,false)) ;
    		   set_time_limit($max_time);
 		  $this->disable_ob();
 		   $this->buttons($max_timer);  
 
          ptln('<div id="xtern_review"><hr>');
          ptln('<table>');
-		 foreach($review as $id=>$errors) {
+		 foreach($reviews_ar as $id=>$errors) {
 		           ptln("<tr><th>$id</th></tr>");
                
                    foreach($errors as $error) {
@@ -246,7 +246,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 						       echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n";
                            }
                            else {
-                               echo "&nbsp;&nbsp;&nbsp;&nbsp;<u>problem link:</u> $url\n";
+                               echo "&nbsp;&nbsp;&nbsp;&nbsp;<u>". $this->getLang('bad_link') . ":</u> $url\n";
                            }                       
                        ptln('</td></tr>');
 						   usleep(300000);
