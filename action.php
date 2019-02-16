@@ -81,6 +81,8 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		$srch = array('[[__ BROKEN-LINK:','LINK-BROKEN __ LINK-BROKEN __') ;
 		$repl = array( '[[','LINK-BROKEN __');
 		$event->result = str_replace($srch,$repl,	$event->result);
+		$event->result = preg_replace("#(\s*)\{\{__ BROKEN\-LINK\:#", "$1__BROKEN-LINK:{{",$event->result);
+		
     }
     
     function update_wiki_page(&$result, $url) {
@@ -88,7 +90,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         $this->current = $url; 
         
 	    $result = preg_replace_callback(
-                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]|ms",
+                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]*|ms",
                      function($matches){
                        $test = preg_split("/[\s]+/",$matches[2]);                      
                 			    							
