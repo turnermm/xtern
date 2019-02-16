@@ -1,4 +1,15 @@
  jQuery( document ).ready(function() { 	
+      jQuery("input.xtern_info_but").click(function() {		
+             jQuery("div#xtern_info" ).toggle();
+			var current_val =  jQuery("input.xtern_info_but").attr('value');
+			if(current_val ==  LANG.plugins.xtern.info_show)  {
+				   jQuery("input.xtern_info_but").attr('value',LANG.plugins.xtern.info_close);
+			}
+			else {
+				 jQuery("input.xtern_info_but").attr('value',LANG.plugins.xtern.info_show);
+			}
+        });  
+		
       var in_admin = 0;
       if(window.location.search.match(/do=admin/)) {
 		  in_admin =1;

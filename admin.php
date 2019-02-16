@@ -10,6 +10,8 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	private  $dir = NULL;
 	private   $accumulator = null;
 	private $broken = array();
+	private $review = false;	
+	private $headers;
     private  $debug_handle = null;
     function __construct() {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
@@ -38,6 +40,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
         case 'download' : 
 	  	    $this->output = 'download'; 
 			$this->dnld = true;
+             break;			
+	    case 'review_links' :
+  	  	    $this->output = 'reviews'; 
+	    	$this->review = true;
       }      
 	
 	  //msg(__DIR__);
@@ -60,12 +66,15 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 	  else if ($this->dnld) {
 		  $this->downloadPem();
 	  }
-	
+	else if($this->review ) {        
+          $this->review_links();
+      }
     }
 	
 	     function check_links($max_time) {
 		   set_time_limit($max_time);
 		  $this->disable_ob();
+		   $this->headers = array();
 		   $this->buttons($max_time,$this->dir);  
 			if(isset($this->dir)){
                 $dir = trim($this->dir,':');
@@ -78,25 +87,43 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		    usleep(300000);	
 			$site = $this->scanDirectories($dir);
 			echo "Checking links\n<br />";
+            echo "<table>\n";
 			 usleep(300000);
 			foreach($site AS $entry=>$data) {
-               // $this->write_debug("\n** New File" . $data['path']);
 				  $handle = fopen($data['path'], "r");             
 				 if ($handle) {	
 					$this->parse_dwfile($handle,$data['id'],$data['path']);
 					fclose($handle);
 				 }
 			}
-           ptln("<br /><b>DONE</b>");
+           ptln("</table><b>DONE</b>");
            ptln('</div>' . NL);
 		   io_saveFile($this->accumulator,serialize($this->broken)) ;	
-		    if($this->debug_handle) {  
               // fclose($this->debug_handle);
-			}
 	}
+    function review_links()  {  
+          $reviews_ar = unserialize(io_readFile($this->accumulator ,false)) ;
+   		   set_time_limit($max_time);
+		  $this->disable_ob();
+		   $this->buttons($max_timer);  
+
+         ptln('<div id="xtern_review"><hr>');
+         ptln('<table>');
+		 foreach($reviews_ar as $id=>$errors) {
+		           ptln("<tr><th>$id</th></tr>");
+               
+                   foreach($errors as $error) {
+                       $this->do_check($error, "", $id);					 
+				   }					   
+       }   
+           ptln("</table><b>DONE</b>");
+           ptln('</div>' . NL);
+      }  
        
      function buttons($max_time = "",$ns="") {        
+          ptln('<div id="xtern_info">');     
           echo $this->locale_xhtml('header');	 
+		  ptln('</div>');
           //$ns = isset($this->dir) ? $this->dir : "";
           ptln('<div id="xtern_adminform">' .NL); 
           ptln('<form action="'.wl($ID).'" method="post">'); 
@@ -108,6 +135,8 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
           ptln('&nbsp;  <input type="submit" name="cmd[check_links]" class  = "xtern_font" value="'.$this->getLang('btn_check_links').'" />');
           ptln('  <label><span class="xtern_font">' .$this->getLang('ns').'</span> ');
           ptln(' <input type="textbox" name="dir"  value="' . $ns . '" /></label>&nbsp;');                
+          ptln('&nbsp;  <input type="submit" name="cmd[review_links]" class  = "xtern_font" value="'.$this->getLang('btn_review').'" />');          
+          ptln('&nbsp;  <input type="button"  class = "xtern_info_but" value = "'. $this->getLang('info_show') . '">');		  
           ptln('</form>');
           if($max_time) {
 			    ptln('<br />' . $this->getLang('max_time') . ":  $max_time");
@@ -139,7 +168,6 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		   while (!feof($handle)) {
                $lineno++;
 				$buffer = fgets($handle);
-              //  $this->write_debug($buffer);
                 if($in_code) {
                     if(preg_match("#<\/code>#",$buffer)) {
                         $in_code = false;                        
@@ -166,6 +194,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                        }
                 }  
                  if(preg_match("#\[?(https?://\S+)\]?#",$buffer,$matches)) {   
+                       
                        preg_match_all("#https?://\S+#",$buffer,$submatches);					   
 					   $num_urls = count($submatches[0]);
 					   if($num_urls > 1) {
@@ -180,8 +209,10 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                  }
               }
            }   
-           function do_check($url, $lineno,$id = "") {
+           function do_check($url, $lineno = "",$id = "") {  
 					list($url,$rest) = explode('|',$url);
+                    $header = $id ? "<tr><th>$id</th></tr>" :  "";
+               
                     if(strpos($url, '{{') !== false || strpos($url, '}}') !== false) {
                         if(preg_match("#\{\{https?://(.*?)\}\}#", $url,$submatches)) {
                             $url = $submatches[1];
@@ -197,15 +228,27 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
                         if(strlen($url) > 1024)  {
                             $status = "414";                       
                         }  
-                                               
+                           if($lineno) {
 						   $this->add_broken($id,$url);
+							   if(!isset($this->headers[$id])) {
+								   ptln($header);
+								   $this->headers[$id] = 1;
+							   }   
+						   }   
                            $trunc = substr($url,0,512);  
                            if(strlen($trunc) > strlen($url)) {
                                $url .= '.  .  .';
                            }
+                           ptln('<tr><td>');
 					    	echo $status .":  $link:\n<br />";
 						   usleep(300000);
-						   echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n<br />";
+                           if($lineno) {
+						       echo '&nbsp;&nbsp;&nbsp;&nbsp;line' . " $lineno:&nbsp;$url" . "\n";
+                           }
+                           else {
+                               echo "&nbsp;&nbsp;&nbsp;&nbsp;<u>". $this->getLang('bad_link') . ":</u> $url\n";
+                           }                       
+                       ptln('</td></tr>');
 						   usleep(300000);
 					}
 		}	
@@ -325,6 +368,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
     }
 
     function write_debug($data) {   
+	return;
       if(!$this->debug_handle) return;  
       fwrite($this->debug_handle, "$data\n");
 }
