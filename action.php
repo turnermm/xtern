@@ -119,8 +119,13 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
     
   function handle_wiki_content(Doku_Event $event, $param) {  
      global $ACT;
-	 if($ACT == 'preview') return;
+     
+	 if($ACT == 'preview') {
+         return;
+     }
+     else if($this->getConf('conceal')) {
      $event->data = preg_replace('#\<em\s+class=(\"|\')u(\1)\>\s*BROKEN\-LINK\:(.*?)LINK\-BROKEN\s*</em>#',"$3",$event->data);
+     }
    }
 
  }
