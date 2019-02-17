@@ -12,6 +12,8 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
        $controller->register_hook('IO_WIKIPAGE_READ', 'AFTER', $this, 'handle_wiki_read'); 	
+       $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'handle_wiki_content'); 	
+       
     }
 
     /**
@@ -78,6 +80,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         foreach($ar[$id] as $url) {            
            $this->update_wiki_page($event->result, $url) ;
         }
+		
 		$srch = array('[[__ BROKEN-LINK:','LINK-BROKEN __ LINK-BROKEN __') ;
 		$repl = array( '[[','LINK-BROKEN __');
 		$event->result = str_replace($srch,$repl,	$event->result);
@@ -93,7 +96,6 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
                       "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]*|ms",
                      function($matches){
                        $test = preg_split("/[\s]+/",$matches[2]);                      
-                			    							
 							foreach($test as $piece) {
 								if(strpos($piece,'http') !== false) {
                                     if(strpos($piece, $this->current) !== false && strpos($matches[0],'-LINK:' .$piece) === false) {   
@@ -114,5 +116,11 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
                   $result
                 );
     }
+    
+  function handle_wiki_content(Doku_Event $event, $param) {  
+     global $ACT;
+	 if($ACT == 'preview') return;
+     $event->data = preg_replace('#\<em\s+class=(\"|\')u(\1)\>\s*BROKEN\-LINK\:(.*?)LINK\-BROKEN\s*</em>#',"$3",$event->data);
+   }
 
  }
