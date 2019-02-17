@@ -13,6 +13,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
        $controller->register_hook('IO_WIKIPAGE_READ', 'AFTER', $this, 'handle_wiki_read'); 	
        $controller->register_hook('TPL_CONTENT_DISPLAY', 'BEFORE', $this, 'handle_wiki_content'); 	
+       $controller->register_hook('COMMON_WIKIPAGE_SAVE', 'BEFORE', $this, 'handle_page_save'); 	
        
     }
 
@@ -127,5 +128,13 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      $event->data = preg_replace('#\<em\s+class=(\"|\')u(\1)\>\s*BROKEN\-LINK\:(.*?)LINK\-BROKEN\s*</em>#',"$3",$event->data);
      }
    }
-
+  function handle_page_save(Doku_Event $event, $param) {  
+        global $INPUT;
+		$url = $INPUT->str('xtern_url');        
+		if(!isset($url) || empty($url)) return;
+        if($event->data['contentChanged']) return;
+        if(strpos($event->data['newContent'], 'BROKEN-LINK:') !== false) {
+            $event->data['contentChanged'] = true;
+        }
+    }
  }
