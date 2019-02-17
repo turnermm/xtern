@@ -94,7 +94,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         $this->current = $url; 
         
 	    $result = preg_replace_callback(
-                      "|(?<!LINK:)\s*(\[\[)?(". preg_quote($url). "(\|)*([^\]]+)*(\]\])?)[\s]*|ms",
+                      "|(?<!LINK:)(\[\[)?(". preg_quote($url). "(\|)*([^\s\]]+)*(\]\])?)[\s]*|ms",
                      function($matches){
                        $test = preg_split("/[\s]+/",$matches[2]);                      
 							foreach($test as $piece) {
