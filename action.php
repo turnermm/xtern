@@ -25,7 +25,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      */
     
    public function curl_check(Doku_Event $event, $param) {
-        global $USERINFO;     
+        global $USERINFO,$JSINFO;     
         $admin = false;
            if(isset($USERINFO)) {
               $groups = $USERINFO['grps'];       
@@ -36,6 +36,9 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
              return;  
          }  
       	$this->accumulator = metaFN('xtern:accumulator','.ser');		
+		if($this->getConf('noicons')) {
+            $JSINFO['xtern_disable'] = '1';
+		}
    }
    
     public function handle_ajax_call_unknown(Doku_Event $event, $param) {
