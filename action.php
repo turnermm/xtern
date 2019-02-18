@@ -103,14 +103,14 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 								  	   if($matches[1] == '[[') {
 										   $link = preg_quote($this->current);										   
 										   $matches[0] = preg_replace("#\[\[($link.*?)\]\]#ms","__ BROKEN-LINK:[[$1]] LINK-BROKEN __",$matches[0]);
-									   }
+									    }
                                        else  
-									   {
-                                        $matches[0] = str_replace($piece,  "__ BROKEN-LINK:" .  $piece .  " LINK-BROKEN __", $matches[0] );								
-								}	
-							}						                              
-                        }       				  
-							}						                              
+									    {
+                                           $matches[0] = str_replace($piece,  "__ BROKEN-LINK:" .  $piece .  " LINK-BROKEN __", $matches[0] );								
+								        }	
+							        }						                              
+                                }       				  
+					        }						                              
                  
                         return $matches[0]; 
                   }, 
