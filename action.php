@@ -8,6 +8,9 @@ if(!defined('DOKU_INC')) die();
 class action_plugin_xtern extends DokuWiki_Action_Plugin {
    	private   $accumulator = null;
     private $current;
+	function __construct() {
+		$this->accumulator = metaFN('xtern:accumulator','.ser');			
+	}
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
        $controller->register_hook('DOKUWIKI_STARTED', 'BEFORE', $this, 'curl_check'); 
@@ -76,9 +79,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		if($event->data[3]) {  //by-pass revision		
 			return;
 		}
-		$url = $INPUT->str('xtern_url');        
-		if(!isset($url) || empty($url)) return;
-       	 
+        if(!file_exists($this->accumulator)) return;
         $id = $INPUT->str('id');
         $ar = unserialize(file_get_contents($this->accumulator));
         foreach($ar[$id] as $url) {            
