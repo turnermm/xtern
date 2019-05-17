@@ -75,10 +75,12 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
     }
 
     function handle_wiki_read(Doku_Event $event, $param) {
-        global $INPUT;
+        global $INPUT, $ACT;
 		if($event->data[3]) {  //by-pass revision		
 			return;
 		}
+        $act = act_clean($ACT);
+        if($act == 'admin') return;
         if(!file_exists($this->accumulator)) return;
         $id = $INPUT->str('id');
         $ar = unserialize(file_get_contents($this->accumulator));
