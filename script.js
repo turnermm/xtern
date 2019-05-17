@@ -14,7 +14,13 @@
       if(window.location.search.match(/do=admin/)) {
 		  in_admin =1;
 	  }  
-	  jQuery("#dokuwiki__content a" ).each (function( index ) { 
+      
+      var selector = "#dokuwiki__content a";  //default
+     if(JSINFO && JSINFO['xtern_selector'])  {      
+        selector = JSINFO['xtern_selector'] ;     
+     }
+
+	  jQuery(selector).each (function( index ) { 
 	 if(in_admin) return;
      if(JSINFO && JSINFO['xtern_disable']) return;
      var _class = jQuery(this).attr('class');

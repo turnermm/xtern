@@ -42,6 +42,12 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		if($this->getConf('noicons')) {
             $JSINFO['xtern_disable'] = '1';
 		}
+     	if($this->getConf('alt_div')) {
+            $JSINFO['xtern_selector'] = "#" .$this->getConf('alt_div') . " a";
+		}
+        else if($this->getConf('alt_class')) {
+            $JSINFO['xtern_selector'] = '.' . $this->getConf('alt_class') . " a";
+		}
    }
    
     public function handle_ajax_call_unknown(Doku_Event $event, $param) {
