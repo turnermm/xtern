@@ -210,6 +210,7 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
               }
            }   
            function do_check($url, $lineno = "",$id = "") {  
+                    $url = trim($url,' )(\\');                  
 					list($url,$rest) = explode('|',$url);
                     $header = $id ? "<tr><th>$id</th></tr>" :  "";
                
