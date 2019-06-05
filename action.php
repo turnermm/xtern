@@ -86,7 +86,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 			return;
 		}
         $act = act_clean($ACT);
-        if($act == 'admin') return;
+        if($act == 'admin' || $act =- 'index') return;
         if(!file_exists($this->accumulator)) return;
         $id = $INPUT->str('id');
         $ar = unserialize(file_get_contents($this->accumulator));
@@ -106,7 +106,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         msg(($url) , 2);
         $this->current = $url;
 
-        $result = preg_replace_callback("|(?<!LINK:)(\[\[)?(" . preg_quote($url) . "(\|)*([^\s\]]+)*(\]\])?)[\s]*|ms", function ($matches)
+        $result = preg_replace_callback("|(?<!LINK:)(\[\[)?(" . preg_quote($url) . "(\|)*([^\]]+)*(\]\])?)[\s]*|ms", function ($matches)
         {
             $test = preg_split("/[\s]+/", $matches[2]); 
             foreach ($test as $piece)
