@@ -5,4 +5,5 @@ $conf['conceal'] = 1;
 $conf['noicons'] = 0;
 $conf['alt_div'] = "";
 $conf['alt_class'] = "";
+$conf['skip_pages'] = "";
 

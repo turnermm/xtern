@@ -7,4 +7,5 @@ $lang['alt_class'] = 'Some templates identify the div which holds ' .
        'the page content by a class name; if yours is one of these, enter the class name here.';
 $lang['alt_div'] = 'Some templates do not use the default id to identify the div which holds ' .
        'the page content; if yours is one of these, enter the div id here.';
+$lang['skip_pages'] = 'A comma separated list of pages where you want the xtern link icons to be suppressed.  Like <code>noicons</code> except that it affects only selected pages.';
 

@@ -28,7 +28,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      */
     
    public function curl_check(Doku_Event $event, $param) {
-        global $USERINFO,$JSINFO;     
+        global $USERINFO,$JSINFO,$ID;     
         $admin = false;
            if(isset($USERINFO)) {
               $groups = $USERINFO['grps'];       
@@ -48,6 +48,15 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         else if($this->getConf('alt_class')) {
             $JSINFO['xtern_selector'] = '.' . $this->getConf('alt_class') . " a";
 		}
+        $skip = $this->getConf('skip_pages'); 
+         if($skip) {
+            $skip = preg_replace("/\s+/","",$skip) ;
+            $skip = str_replace(',','|',$skip) ;
+            $regex = "#^($skip)$#";
+            if(preg_match($regex,$ID)) {
+                 $JSINFO['xtern_skip'] = 1;
+            }
+         }
    }
    
     public function handle_ajax_call_unknown(Doku_Event $event, $param) {

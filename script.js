@@ -23,6 +23,7 @@
 	  jQuery(selector).each (function( index ) { 
 	 if(in_admin) return;
      if(JSINFO && JSINFO['xtern_disable']) return;
+     if(JSINFO && JSINFO['xtern_skip']) return;
      var _class = jQuery(this).attr('class');
      if(typeof _class == 'undefined') return;    
      if(!_class.match(/extern/)) return;

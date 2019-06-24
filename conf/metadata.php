@@ -5,5 +5,5 @@ $meta['conceal']  = array('onoff');
 $meta['noicons'] = array('onoff');
 $meta['alt_div'] = array('string');
 $meta['alt_class'] = array('string');
-
+$meta['skip_pages'] = array('string');
 
