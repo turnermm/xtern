@@ -98,6 +98,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         if($act == 'admin' || $act =- 'index') return;
         if(!file_exists($this->accumulator)) return;
         $id = $INPUT->str('id');
+        $id = str_replace(array('/','\\'), ':', $id);
         $ar = unserialize(file_get_contents($this->accumulator));
         foreach($ar[$id] as $url) {            
            $this->update_wiki_page($event->result, $url) ;
