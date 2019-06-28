@@ -95,7 +95,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 			return;
 		}
         $act = act_clean($ACT);
-       if($act == 'admin' || $act = 'index' || $act = 'login') return
+       if($act == 'admin' || $act = 'index' || $act = 'login') return;
         if(!file_exists($this->accumulator)) return;
         $id = $INPUT->str('id');
         $id = str_replace(array('/','\\'), ':', $id);
