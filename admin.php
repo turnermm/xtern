@@ -17,7 +17,6 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 		$this->wikiRoot = realpath (DOKU_INC. 'data/pages');
 		$this->accumulator = metaFN('xtern:accumulator','.ser');		
       //  $this->debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
-        
 	}
 
     function handle() {
