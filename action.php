@@ -107,12 +107,14 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
            $this->update_wiki_page($event->result, $url) ;
         }
 		
+        //__BROKEN-LINK: __ BROKEN-LINK:[
+       $event->result = preg_replace('/__\s*BROKEN-LINK:__\s*BROKEN-LINK:/ms', '__ BROKEN-LINK:', $event->result);
+       $event->result = preg_replace('/\s*LINK-BROKEN\s*__\s*LINK-BROKEN\s*__/ms', 'LINK-BROKEN__', $event->result);
+       $event->result = preg_replace('/_*\s*BROKEN-LINK:_*\s*BROKEN-LINK:/ms', '__BROKEN-LINK:  ',  $event->result);
+       $event->result = preg_replace('/LINK-BROKEN__LINK-BROKEN__/ms', 'LINK-BROKEN__',  $event->result);
+       $event->result = preg_replace('/BROKEN-LINK:\s+/ms', 'BROKEN-LINK: ',  $event->result);
+       $event->result = preg_replace('/__BROKEN-LINK: \s*_*\s* BROKEN-LINK:/ms','__ BROKEN-LINK:',$event->result);
 		
-       $event->result = preg_replace('/__\s*BROKEN-LINK:__\s*BROKEN-LINK:/', '__ BROKEN-LINK:', $event->result);
-       $event->result = preg_replace('/\s*LINK-BROKEN\s*__\s*LINK-BROKEN\s*__/', 'LINK-BROKEN__', $event->result);
-       $event->result = preg_replace('/__\s*BROKEN-LINK:__\s*BROKEN-LINK:/', '__BROKEN-LINK:  ',  $event->result);
-       $event->result = preg_replace('/LINK-BROKEN__LINK-BROKEN__/', 'LINK-BROKEN__',  $event->result);
-        $event->result = preg_replace('/BROKEN-LINK:\s+/', 'BROKEN-LINK: ',  $event->result);
     }
     
     function update_wiki_page(&$result, $url)
