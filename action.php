@@ -100,23 +100,27 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         $id = $INPUT->str('id');
         $id = str_replace(array('/','\\'), ':', $id);
         $ar = unserialize(file_get_contents($this->accumulator));
+        $srch = array('__\s*BROKEN-LINK:','LINK-BROKEN\s*__') ;
+        $event->result = preg_replace("#$srch#", "",$event->result);
+        $event->result = str_replace($srch,"",$event->result);  
         foreach($ar[$id] as $url) {            
            $this->update_wiki_page($event->result, $url) ;
         }
 		
-		$srch = array('[[__ BROKEN-LINK:','LINK-BROKEN __ LINK-BROKEN __') ;
-		$repl = array( '[[','LINK-BROKEN __');
-		$event->result = str_replace($srch,$repl,	$event->result);
-		$event->result = preg_replace("#(\s*)\{\{__ BROKEN\-LINK\:#", "$1__BROKEN-LINK:{{",$event->result);
 		
+       $event->result = preg_replace('/__\s*BROKEN-LINK:__\s*BROKEN-LINK:/', '__ BROKEN-LINK:', $event->result);
+       $event->result = preg_replace('/\s*LINK-BROKEN\s*__\s*LINK-BROKEN\s*__/', 'LINK-BROKEN__', $event->result);
+       $event->result = preg_replace('/__\s*BROKEN-LINK:__\s*BROKEN-LINK:/', '__BROKEN-LINK:  ',  $event->result);
+       $event->result = preg_replace('/LINK-BROKEN__LINK-BROKEN__/', 'LINK-BROKEN__',  $event->result);
+        $event->result = preg_replace('/BROKEN-LINK:\s+/', 'BROKEN-LINK: ',  $event->result);
     }
     
     function update_wiki_page(&$result, $url)
     {
         msg(($url) , 2);
         $this->current = $url;
-
-        $result = preg_replace_callback("|(?<!LINK:)(\[\[)?(" . preg_quote($url) . "(\|)*([^\]]+)*(\]\])?)[\s]*|ms", function ($matches)
+  //  $result = preg_replace_callback("|(?<!LINK:)(\[\[)?(" . preg_quote($url) . "(\|)*([^\]]+)*(\]\])?)[\s]*|ms", function ($matches)
+        $result = preg_replace_callback("|(?<!__LINK:)(\[\[)?(" . preg_quote($url) . "(\|)*([^\]]+)*(\]\])?)[\s]*|ms", function ($matches)
         {
             $test = preg_split("/[\s]+/", $matches[2]); 
             foreach ($test as $piece)
@@ -151,6 +155,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
      }
      else if($this->getConf('conceal')) {
      $event->data = preg_replace('#\<em\s+class=(\"|\')u(\1)\>\s*BROKEN\-LINK\:(.*?)LINK\-BROKEN\s*</em>#',"$3",$event->data);
+     return;
      }
    }
   function handle_page_save(Doku_Event $event, $param) {  
@@ -162,4 +167,13 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
             $event->data['contentChanged'] = true;
         }
     }
+    
+    function write_debug($data) {   
+	  return;
+      $debug_handle=fopen(DOKU_INC.'xtern.txt', 'wb');
+      if(!$debug_handle) return;  
+      fwrite($debug_handle, $data);
+      fclose($debug_handle);
+   }
+   
  }
