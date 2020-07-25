@@ -103,8 +103,10 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
         $srch = array('__\s*BROKEN-LINK:','LINK-BROKEN\s*__') ;
         $event->result = preg_replace("#$srch#", "",$event->result);
         $event->result = str_replace($srch,"",$event->result);  
+        if(!empty($ar[$id])) {
         foreach($ar[$id] as $url) {            
            $this->update_wiki_page($event->result, $url) ;
+        }
         }
 		
         //__BROKEN-LINK: __ BROKEN-LINK:[
