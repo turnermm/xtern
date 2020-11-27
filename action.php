@@ -83,9 +83,19 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 		curl_setopt($ch,CURLOPT_TIMEOUT,10);
 		$output = curl_exec($ch);
-		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_errno = curl_errno($ch);
+        if($curl_errno) {
+            if($curl_errno == "28") {
+                $status = "408";
+            }
+            else if($curl_errno == "60") {
+                $status = "495";
+            }            
+            else $status = $curl_errno;
+        }  
+		else $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
-		echo "$httpcode";
+		echo "$status";
         return 1;
     }
 
