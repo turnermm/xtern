@@ -42,7 +42,8 @@
 		    dataType: "html"
 		});
 		 
-		jQuery.when(request).done(function( data,status) {         
+		jQuery.when(request).done(function( data,status) {    
+     
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
@@ -86,8 +87,7 @@
 			    lnk.attr('title', title);
 				lnk.removeClass(_class).addClass( "xtern_noaccess" );
 			}	
-			else {        
-alert(data + " " + _url + " " + status);             
+			else {          
                 if(data == "NOCURL") return;           
                  lnk.removeClass(_class).addClass( "xtern_broken" );   
 			}

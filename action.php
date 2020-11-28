@@ -72,8 +72,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
            echo "NOCURL";
            return;
        }
-   //     $url = str_replace('%', '%2520',$url);
-//$url = urlencode($url);
+
        $ch = curl_init($url);
 	   if($this->getConf('ca_required')) {
             curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/ca/cacert.pem");
