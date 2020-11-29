@@ -43,7 +43,6 @@
 		});
 		 
 		jQuery.when(request).done(function( data,status) {
-
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
