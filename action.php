@@ -9,7 +9,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
    	private   $accumulator = null;
     private $current;
 	function __construct() {
-		$this->accumulator = metaFN('xtern:accumulator','.ser');	
+		$this->accumulator = metaFN('xtern:accumulator','.ser');
 	}
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
@@ -95,9 +95,6 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
             else $status = $curl_errno;
         }  
 		else $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if($status == "404" && strpos($url,'%') !== false) {
-            $status = "PERCENT";
-        }
 		curl_close($ch);
 		echo "$status";
         return 1;
