@@ -9,7 +9,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
    	private   $accumulator = null;
     private $current;
 	function __construct() {
-		$this->accumulator = metaFN('xtern:accumulator','.ser');			
+		$this->accumulator = metaFN('xtern:accumulator','.ser');	
 	}
     public function register(Doku_Event_Handler $controller) {
        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this, 'handle_ajax_call_unknown');    
@@ -72,7 +72,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
            echo "NOCURL";
            return;
        }
-
+       $url = urldecode($url);
        $ch = curl_init($url);
 	   if($this->getConf('ca_required')) {
             curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . "/ca/cacert.pem");
@@ -82,10 +82,24 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 		curl_setopt($ch,CURLOPT_TIMEOUT,10);
+        curl_setopt($ch, CURLOPT_NOBODY, 1); //just fetch headers
 		$output = curl_exec($ch);
-		$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_errno = curl_errno($ch);
+        if($curl_errno) {
+            if($curl_errno == "28") {
+                $status = "408";
+            }
+            else if($curl_errno == "60") {
+                $status = "495";
+            }            
+            else $status = $curl_errno;
+        }  
+		else $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($status == "404" && strpos($url,'%') !== false) {
+            $status = "PERCENT";
+        }
 		curl_close($ch);
-		echo "$httpcode";
+		echo "$status";
         return 1;
     }
 

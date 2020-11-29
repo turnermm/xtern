@@ -266,12 +266,13 @@ class admin_plugin_xtern extends DokuWiki_Admin_Plugin {
 			curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 			curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 			curl_setopt($ch,CURLOPT_TIMEOUT,15);
+            curl_setopt($ch, CURLOPT_NOBODY, 1); //just fetch headers            
 			$output = curl_exec($ch);
 			$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $curl_errno = curl_errno($ch);
-			 if($curl_errno && $curl_errno !=3) {
+			if($curl_errno) {
 				return "Curl Erro: " .curl_errno($ch) .  "--" . curl_error($ch);			   
-		   }
+		    }
 			curl_close($ch);
 			return trim("$httpcode");   
 		 } 
