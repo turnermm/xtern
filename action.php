@@ -82,7 +82,7 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
 		curl_setopt($ch,CURLOPT_FOLLOWLOCATION,1);
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5); 
 		curl_setopt($ch,CURLOPT_TIMEOUT,10);
-        curl_setopt($ch, CURLOPT_NOBODY, 1);    
+        curl_setopt($ch, CURLOPT_NOBODY, 1); //just fetch headers
 		$output = curl_exec($ch);
         $curl_errno = curl_errno($ch);
         if($curl_errno) {
@@ -95,6 +95,9 @@ class action_plugin_xtern extends DokuWiki_Action_Plugin {
             else $status = $curl_errno;
         }  
 		else $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($status == "404" && strpos($url,'%') !== false) {
+            $status = "PERCENT";
+        }
 		curl_close($ch);
 		echo "$status";
         return 1;

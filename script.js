@@ -42,8 +42,8 @@
 		    dataType: "html"
 		});
 		 
-		jQuery.when(request).done(function( data,status) {    
-     
+		jQuery.when(request).done(function( data,status) {
+
 			if(data =="200" || data == '301' || data == '302') {		                      
               lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
@@ -88,7 +88,12 @@
 				lnk.removeClass(_class).addClass( "xtern_noaccess" );
 			}	
 			else {          
-                if(data == "NOCURL") return;           
+                if(data == "NOCURL") return;
+                if(data == "PERCENT") {
+                    lnk.attr('title', 'Unable to process url');
+                    lnk.removeClass(_class).addClass( "xtern_noaccess" )
+                    return;
+                }                           
                  lnk.removeClass(_class).addClass( "xtern_broken" );   
 			}
 		});
