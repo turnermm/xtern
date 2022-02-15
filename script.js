@@ -1,4 +1,4 @@
- jQuery( document ).ready(function() { 	
+jQuery (function() {   	
       jQuery("input.xtern_info_but").click(function() {		
              jQuery("div#xtern_info" ).toggle();
 			var current_val =  jQuery("input.xtern_info_but").attr('value');
