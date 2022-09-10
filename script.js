@@ -44,9 +44,9 @@ jQuery (function() {
 		 
 		jQuery.when(request).done(function( data ,status) {
 			if(data =="200" || data == '301' || data == '302') {		                      
-              lnk.removeClass(_class).addClass( "xtern_xtrn" );             
+                lnk.removeClass(_class).addClass( "xtern_xtrn" );             
 			}
-			else if( (data.match(/^4\d\d/))) {
+			else if( data.match(/^(4|5)\d\d/) ) {               
                 var title;  
                 switch (data) {
                      case "400":
@@ -78,7 +78,16 @@ jQuery (function() {
                          break;
                     case "495":
                          title = '495: SSL Certificate Error';
-                         break;                     
+                         break; 
+                    case "500":
+                        title =  '500 Internal Server Error';
+                        break;
+                    case "503": 
+                         title = '503: Service Unavailable'; 
+                         break;
+                    case "511":
+                         title = "Network Authentication Required";
+                         break;
                     default:
                          title=LANG.plugins.xtern.restricted;
                          break;
