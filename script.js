@@ -80,13 +80,19 @@ jQuery (function() {
                          title = '495: SSL Certificate Error';
                          break; 
                     case "500":
-                        title =  '500 Internal Server Error';
+                         title =  LANG.plugins.xtern.serr;
+                   	     lnk.attr('title', title);
+				         lnk.removeClass(_class).addClass( "serv-err" );                         
                         break;
                     case "503": 
-                         title = '503: Service Unavailable'; 
+                         title = LANG.plugins.xtern.delay; 
+                  	     lnk.attr('title', title);
+				         lnk.removeClass(_class).addClass( "xtern_delay" );
                          break;
                     case "511":
-                         title = "Network Authentication Required";
+                         title = LANG.plugins.xtern.authreq;
+                   	     lnk.attr('title', title);
+				         lnk.removeClass(_class).addClass( "auth-req" );                                                 
                          break;
                     default:
                          title=LANG.plugins.xtern.restricted;

@@ -15,6 +15,10 @@ $lang['btn_review'] = 'Review last link check';
 $lang['info_show'] = 'Info';
 $lang['js']['info_show'] = $lang['info_show'] ;
 $lang['js']['info_close'] = 'Close info';
-$lang['bad_link'] = 'problem link:';
+$lang['js']['bad_link'] = 'problem link:';
+$lang['js']['serr'] = '500: Internal Server Error';
+$lang['js']['gateway'] = '502: Bad Gateway'; 
+$lang['js']['delay'] = '503: Service Temporarily Unavailable'; 
+$lang['js']['authreq'] = '511: Network Authentication Required'; 
 
 
